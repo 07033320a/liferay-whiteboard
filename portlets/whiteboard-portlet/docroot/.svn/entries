@@ -1,0 +1,77 @@
+10
+
+dir
+7465
+https://svn.rivetlogic.com/repos/rivets/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot
+https://svn.rivetlogic.com/repos/rivets
+
+
+
+2014-03-28T21:48:11.881958Z
+7464
+alejandro.soto
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+99b3b705-0147-0410-bc6d-d554f871c384
+
+WEB-INF
+dir
+
+css
+dir
+
+html
+dir
+
+icon.png
+file
+
+
+
+
+2014-03-21T19:28:15.000000Z
+be8150319d9bec0c7c6a58eba0e72e66
+2014-03-26T19:40:02.756754Z
+7450
+alejandro.soto
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+467
+
+images
+dir
+
+js
+dir
+

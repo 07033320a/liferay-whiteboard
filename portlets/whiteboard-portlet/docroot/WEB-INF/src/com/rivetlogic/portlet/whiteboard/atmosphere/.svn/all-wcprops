@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 205
+/repos/rivets/!svn/ver/7464/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot/WEB-INF/src/com/rivetlogic/portlet/whiteboard/atmosphere
+END
+WhiteboardHandlerUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 232
+/repos/rivets/!svn/ver/7469/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot/WEB-INF/src/com/rivetlogic/portlet/whiteboard/atmosphere/WhiteboardHandlerUtil.java
+END
+WhiteboardHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 228
+/repos/rivets/!svn/ver/7469/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot/WEB-INF/src/com/rivetlogic/portlet/whiteboard/atmosphere/WhiteboardHandler.java
+END
+UserData.java
+K 25
+svn:wc:ra_dav:version-url
+V 219
+/repos/rivets/!svn/ver/7469/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot/WEB-INF/src/com/rivetlogic/portlet/whiteboard/atmosphere/UserData.java
+END
+WhiteBoardResourceEventListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 242
+/repos/rivets/!svn/ver/7469/archives/hrportal/branches/6.2%20CE%20GA%201/liferay-plugins-sdk-6.2.0/portlets/collaboration-whiteboard-portlet/docroot/WEB-INF/src/com/rivetlogic/portlet/whiteboard/atmosphere/WhiteBoardResourceEventListener.java
+END
