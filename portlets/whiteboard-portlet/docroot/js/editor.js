@@ -85,11 +85,13 @@ YUI.add('whiteboard', function (Y, NAME) {
             
             /* after free draw finished on mouse up */
             this.get('canvas').on('path:created', function (e) {
+                var options = instance.retrieveShapeState(e.path);
+                delete options.path;
                 instance.createShape({
                     type: EditorManager.CONSTANTS.PATH,
                     state: {
                         path: e.path.path,
-                        options: instance.retrieveShapeState(e.path)
+                        options: options
                     }
                 }, e.path);
             });
