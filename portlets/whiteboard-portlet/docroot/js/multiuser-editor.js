@@ -36,9 +36,9 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
                 instance.get('container').one('.users-online .users-online-wrapper').toggleClass('show');
             });
             this.disconnectedModalMessage = new Y.Modal({
-                bodyContent: 'Connection issues detected, please try to <a href="javascript:window.location.reload()">reload</a> page',
+                bodyContent: Liferay.Language.get('rivetlogic.whiteboard.connection.issues.message'),
                 centered: true,
-                headerContent: 'Collaboration\'s Whiteboard',
+                headerContent: Liferay.Language.get('rivetlogic.whiteboard.message.title'),
                 modal: true,
                 visible: false,
                 width: 450,

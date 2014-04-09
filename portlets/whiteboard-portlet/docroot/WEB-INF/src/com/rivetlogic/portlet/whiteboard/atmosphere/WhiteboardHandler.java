@@ -51,11 +51,11 @@ import com.liferay.portal.kernel.util.StringPool;
         BroadcastOnPostAtmosphereInterceptor.class,
         SuspendTrackerInterceptor.class }, broadcaster = SimpleBroadcaster.class)
 public class WhiteboardHandler extends AtmosphereHandlerAdapter {
-    
+	
+    private static final String ENCODING = "UTF-8";
+    private static final String DUMP_MESSAGE = "dump";
     private static final Log LOG = LogFactoryUtil.getLog(WhiteboardHandler.class);
-
-    private final ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
-    
+    private final ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();   
     private final ConcurrentMap<String, JSONObject> whiteBoardDump = new ConcurrentSkipListMap<String, JSONObject>();
     
     @Override
@@ -63,7 +63,7 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
         // user joined
         String sessionId = resource.session().getId();
         if (loggedUserMap.get(sessionId) == null) {
-            String userImagePath = URLDecoder.decode(resource.getRequest().getParameter(WhiteboardHandlerUtil.USER_IMAGEPATH), "UTF-8");
+            String userImagePath = URLDecoder.decode(resource.getRequest().getParameter(WhiteboardHandlerUtil.USER_IMAGEPATH), ENCODING);
             String userName = resource.getRequest().getParameter(WhiteboardHandlerUtil.USERNAME);
             loggedUserMap.put(resource.session().getId(), new UserData(userName, userImagePath));
             /* listens to disconnection event */
@@ -86,23 +86,19 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
                     if (WhiteboardHandlerUtil.LOGIN.equals(jsonMessage.getString(WhiteboardHandlerUtil.TYPE))) {
                         JSONObject usersLoggedMessage = WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap);
                         /* adds whiteboard dump to the message */
-                        usersLoggedMessage.put("dump", WhiteboardHandlerUtil.loadWhiteboardDump(whiteBoardDump));
+                        usersLoggedMessage.put(DUMP_MESSAGE, WhiteboardHandlerUtil.loadWhiteboardDump(whiteBoardDump));
                         event.getResource().getBroadcaster().broadcast(usersLoggedMessage);
                     } else {
                         /* just broadcast the message */
-                        LOG.info("Broadcasting = " + message);
+                        LOG.debug("Broadcasting = " + message);
                         /* adds whiteboard updates to the dump */
                         WhiteboardHandlerUtil.persistWhiteboardDump(whiteBoardDump, jsonMessage);
                         event.getResource().write(message);
                     }
                 } catch (JSONException e) {
-                    LOG.info("JSON parse failed");
+                    LOG.debug("JSON parse failed");
                 }
-            }
-            
-        }
-        
+            }   
+        }   
     }
-
-
 }

@@ -16,8 +16,11 @@
  */
 --%>
 
+<%-- Note: don't remove the css styles declared inline for some components in this page  --%>
+
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 <%@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %>
+<%@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
 <%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
 
@@ -27,9 +30,9 @@
 <input type="hidden" class="profile-image-path" value="<%= HtmlUtil.escape(user.getPortraitURL(themeDisplay)) %>"/>
 <div class="editor">
     <div class="users-online">
-        <a href="#" class="expand-collapse-btn"><i class="icon-user"></i> <span class="count"></span> User(s) Online</a>
+        <a href="#" class="expand-collapse-btn"><i class="icon-user"></i> <span class="count"></span> <liferay-ui:message key="rivetlogic.whiteboard.users.online"/></a>
         <div class="users-online-wrapper">
-            <header><h6>Currently being viewed by:</h6></header>
+            <header><h6><liferay-ui:message key="rivetlogic.whiteboard.users.header"/></h6></header>
             <div class="bd"></div>
         </div>
     </div>
@@ -37,65 +40,65 @@
     </div>
     <menu>
         <div class="btn-group btn-group-vertical">
-            <button class="btn add" data-shape="rectangle" title="Add rectangle"><span></span></button>
-            <button class="btn add" data-shape="line" title="Add line"><span></span></button>
-            <button class="btn add" data-shape="circle" title="Add circle"><span></span></button>
-            <button class="btn free"><i class="icon-pencil" title="Free draw"></i></button>
-            <button class="btn add" data-shape="text" title="Add text"><span></span></button>
-            <button class="btn delete" title="Remove object"><i class="icon-remove"></i></button>
-            <button class="btn clean" title="Clean canvas"><i class="icon-trash"></i></button>
-            <div class="color-picker stroke yui3-skin-sam"><label>Stroke:</label>
+            <button class="btn add" data-shape="rectangle" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.rectangle.title"/>'><span></span></button>
+            <button class="btn add" data-shape="line" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.line.title"/>'><span></span></button>
+            <button class="btn add" data-shape="circle" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.circle.title"/>'><span></span></button>
+            <button class="btn free" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.free.title"/>'><i class="icon-pencil" ></i></button>
+            <button class="btn add" data-shape="text" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.text.title"/>'><span></span></button>
+            <button class="btn delete" title='<liferay-ui:message key="rivetlogic.whiteboard.shapes.remove.title"/>'><i class="icon-remove"></i></button>
+            <button class="btn clean" title='<liferay-ui:message key="rivetlogic.whiteboard.clean.canvas.title"/>'><i class="icon-trash"></i></button>
+            <div class="color-picker stroke yui3-skin-sam"><label><liferay-ui:message key="rivetlogic.whiteboard.stroke"/></label>
                 <span class="sample" style="background-color: #000000;"></span>
                 <div class="color-picker-container hidden">
-                    <a href="#" class="close-picker">close</a>
+                    <a href="#" class="close-picker"><liferay-ui:message key="rivetlogic.whiteboard.close"/></a>
                     <div class="picker">
                         <div id="hue-dial" class="hue-dial"></div>
                         <div class="sliders">
-                            <div id="sat-slider" class="sat-slider"><strong>Saturation: <span></span></strong></div>
-                            <div id="lum-slider" class="lum-slider"><strong>Luminance: <span></span></strong></div>
+                            <div id="sat-slider" class="sat-slider"><strong><liferay-ui:message key="rivetlogic.whiteboard.saturation"/> <span></span></strong></div>
+                            <div id="lum-slider" class="lum-slider"><strong><liferay-ui:message key="rivetlogic.whiteboard.luminance"/> <span></span></strong></div>
                         </div>
                         <div class="color" style="background-color: #000000;"></div>
                     </div>
                 </div>
             </div>
-            <div class="color-picker fill yui3-skin-sam"><label>Fill:</label>
+            <div class="color-picker fill yui3-skin-sam"><label><liferay-ui:message key="rivetlogic.whiteboard.fill"/></label>
                 <span class="sample" style="background-color: #FFFFFF;"></span>
                 <div class="color-picker-container hidden">
-                    <a href="#" class="close-picker">close</a>
+                    <a href="#" class="close-picker"><liferay-ui:message key="rivetlogic.whiteboard.close"/></a>
                     <div class="picker">
                         <div id="hue-dial" class="hue-dial"></div>
                         <div class="sliders">
-                            <div id="sat-slider" class="sat-slider"><strong>Saturation: <span></span></strong></div>
-                            <div id="lum-slider" class="lum-slider"><strong>Luminance: <span></span></strong></div>
+                            <div id="sat-slider" class="sat-slider"><strong><liferay-ui:message key="rivetlogic.whiteboard.saturation"/> <span></span></strong></div>
+                            <div id="lum-slider" class="lum-slider"><strong><liferay-ui:message key="rivetlogic.whiteboard.luminance"/> <span></span></strong></div>
                         </div>
                         <div class="color" style="background-color: #FFFFFF;"></div>
                     </div>
                 </div>
                 <span class="opacity">
-                    <label>Opacity:</label>
+                    <label><liferay-ui:message key="rivetlogic.whiteboard.opacity"/></label>
                     <select>
-                        <option value="1">100%</option>
-                        <option value="0.9">90%</option>
-                        <option value="0.8">80%</option>
-                        <option value="0.7">70%</option>
-                        <option value="0.6">60%</option>
-                        <option value="0.5">50%</option>
-                        <option value="0.4">40%</option>
-                        <option value="0.3">30%</option>
-                        <option value="0.2">20%</option>
-                        <option value="0.1">10%</option>
-                        <option value="0.000001">0%</option>
+                        <option value="1"><liferay-ui:message key="rivetlogic.whiteboard.opacity.1"/></option>
+                        <option value="0.9"><liferay-ui:message key="rivetlogic.whiteboard.opacity.09"/></option>
+                        <option value="0.8"><liferay-ui:message key="rivetlogic.whiteboard.opacity.08"/></option>
+                        <option value="0.7"><liferay-ui:message key="rivetlogic.whiteboard.opacity.07"/></option>
+                        <option value="0.6"><liferay-ui:message key="rivetlogic.whiteboard.opacity.06"/></option>
+                        <option value="0.5"><liferay-ui:message key="rivetlogic.whiteboard.opacity.05"/></option>
+                        <option value="0.4"><liferay-ui:message key="rivetlogic.whiteboard.opacity.04"/></option>
+                        <option value="0.3"><liferay-ui:message key="rivetlogic.whiteboard.opacity.03"/></option>
+                        <option value="0.2"><liferay-ui:message key="rivetlogic.whiteboard.opacity.02"/></option>
+                        <option value="0.1"><liferay-ui:message key="rivetlogic.whiteboard.opacity.01"/></option>
+                        <option value="0.000001"><liferay-ui:message key="rivetlogic.whiteboard.opacity.0"/></option>
                     </select>
                 </span>
             </div>
         </div>
 
     </menu>
-    <canvas id="editor-canvas" width="500" height="500"></canvas>
+    <canvas id="editor-canvas" height="500"></canvas>
     <div class="text-editor">
         <textarea class="text"></textarea>
-        <button class="btn btn-primary edit">Edit</button>
-        <button class="btn cancel">Cancel</button>
+        <button class="btn btn-primary edit"><liferay-ui:message key="rivetlogic.whiteboard.canvas.edit"/></button>
+        <button class="btn cancel"><liferay-ui:message key="rivetlogic.whiteboard.canvas.cancel"/></button>
     </div>
 </div>
 

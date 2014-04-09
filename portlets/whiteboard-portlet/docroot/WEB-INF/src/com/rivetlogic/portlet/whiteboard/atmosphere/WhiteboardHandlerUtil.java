@@ -48,6 +48,7 @@ public class WhiteboardHandlerUtil {
     public static final String ACTION = "action";
     public static final String TOOLTIP = "tooltip";
     public static final String EDITOR_ID = "editorId";
+    public static final String DEFAULT_EDITOR_ID = "0";
     
     /* SHAPES */
     public static final String LINE = "line";
@@ -77,7 +78,7 @@ public class WhiteboardHandlerUtil {
             String key = entry.getKey();
             UserData userData = entry.getValue();
             JSONObject user = JSONFactoryUtil.createJSONObject();
-            LOG.info(user);
+            LOG.debug(user);
             user.put(USERNAME, userData.getUserName());
             user.put(USER_IMAGEPATH, userData.getUserImagePath());  
             user.put(SESSIONID, key);
@@ -91,9 +92,9 @@ public class WhiteboardHandlerUtil {
         
         /* add commands to main json */
         usersLogged.put(COMMANDS, commands);
-        usersLogged.put(EDITOR_ID, "0");
+        usersLogged.put(EDITOR_ID, DEFAULT_EDITOR_ID);
         
-        LOG.info(usersLogged.toString());
+        LOG.debug(usersLogged.toString());
         
         return usersLogged;
 

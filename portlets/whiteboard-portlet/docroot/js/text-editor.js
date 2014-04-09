@@ -24,7 +24,7 @@ YUI.add('text-editor', function (Y, NAME) {
         initializer: function () {
             var panel = new Y.Panel({
                 srcNode: this.get('textEditorNode'),
-                headerContent: 'Edit Text',
+                headerContent: Liferay.Language.get('rivetlogic.whiteboard.edit.text'),
                 width: 250,
                 zIndex: 10000,
                 centered: true,
