@@ -18,31 +18,29 @@
 package com.rivetlogic.portlet.whiteboard.atmosphere;
 
 public class UserData {
-    private String userName;
-    private String userImagePath;
-    
-    public UserData(String userName, String userImagePath) {
-        super();
-        this.userName = userName;
-        this.userImagePath = userImagePath;
-    }
+	private String userName;
+	private String userImagePath;
 
-    public String getUserName() {
-        return userName;
-    }
+	public UserData(String userName, String userImagePath) {
+		super();
+		this.userName = userName;
+		this.userImagePath = userImagePath;
+	}
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+	public String getUserName() {
+		return userName;
+	}
 
-    public String getUserImagePath() {
-        return userImagePath;
-    }
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
-    public void setUserImagePath(String userImagePath) {
-        this.userImagePath = userImagePath;
-    }
+	public String getUserImagePath() {
+		return userImagePath;
+	}
 
-    
-    
+	public void setUserImagePath(String userImagePath) {
+		this.userImagePath = userImagePath;
+	}
+
 }
