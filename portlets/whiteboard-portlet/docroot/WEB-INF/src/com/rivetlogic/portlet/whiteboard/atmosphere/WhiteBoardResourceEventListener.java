@@ -46,39 +46,39 @@ public class WhiteBoardResourceEventListener implements
     }
 
     @Override
-    public void onBroadcast(AtmosphereResourceEvent arg0) {
+    public void onBroadcast(AtmosphereResourceEvent event) {
 
     }
 
     @Override
-    public void onClose(AtmosphereResourceEvent arg0) {
+    public void onClose(AtmosphereResourceEvent event) {
 
     }
 
     @Override
-    public void onDisconnect(AtmosphereResourceEvent arg0) {
+    public void onDisconnect(AtmosphereResourceEvent event) {
         /* removes user from map and broadcast users list again */
         this.loggedUserMap.remove(sessionId);
-        arg0.getResource().getBroadcaster().broadcast(WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap));
+        event.getResource().getBroadcaster().broadcast(WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap));
     }
 
     @Override
-    public void onPreSuspend(AtmosphereResourceEvent arg0) {
+    public void onPreSuspend(AtmosphereResourceEvent event) {
         
     }
 
     @Override
-    public void onResume(AtmosphereResourceEvent arg0) {
+    public void onResume(AtmosphereResourceEvent event) {
 
     }
 
     @Override
-    public void onSuspend(AtmosphereResourceEvent arg0) {
+    public void onSuspend(AtmosphereResourceEvent event) {
 
     }
 
     @Override
-    public void onThrowable(AtmosphereResourceEvent arg0) {
+    public void onThrowable(AtmosphereResourceEvent event) {
 
     }
 
