@@ -27,7 +27,6 @@
 <liferay-theme:defineObjects />
 <portlet:defineObjects />
 
-<input type="hidden" class="profile-image-path" value="<%= HtmlUtil.escape(user.getPortraitURL(themeDisplay)) %>"/>
 <div class="editor">
     <div class="users-online">
         <a href="#" class="expand-collapse-btn"><i class="icon-user"></i> <span class="count"></span> <liferay-ui:message key="rivetlogic.whiteboard.users.online"/></a>

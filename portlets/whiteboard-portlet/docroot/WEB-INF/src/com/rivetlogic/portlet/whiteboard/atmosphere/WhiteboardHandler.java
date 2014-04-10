@@ -20,9 +20,15 @@ package com.rivetlogic.portlet.whiteboard.atmosphere;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.User;
+import com.liferay.portal.model.UserConstants;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -55,13 +61,39 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
         
+        String userName = StringPool.BLANK;
+        String userImagePath = StringPool.BLANK;
+        
         // user joined
         String sessionId = resource.session().getId();
         if (loggedUserMap.get(sessionId) == null) {
-            String userImagePath = URLDecoder.decode(
-                    resource.getRequest().getParameter(WhiteboardHandlerUtil.USER_IMAGEPATH), ENCODING);
-            String userName = resource.getRequest().getParameter(WhiteboardHandlerUtil.USERNAME);
+            
+            try {
+                
+                String baseImagePath = URLDecoder.decode(
+                        resource.getRequest().getParameter(WhiteboardHandlerUtil.BASE_IMAGEPATH), ENCODING);
+                LOG.debug("base image path " + baseImagePath);
+                
+                User user = PortalUtil.getUser(resource.getRequest());
+                long companyId = PortalUtil.getCompanyId(resource.getRequest());
+                
+                if (user == null || user.isDefaultUser()) {
+                    LOG.debug("This is guest user");
+                    user = UserLocalServiceUtil.getDefaultUser(companyId);
+                    userName = LanguageUtil.get(LocaleUtil.getDefault(), WhiteboardHandlerUtil.GUEST_USER_NAME_LABEL);
+                } else {
+                    userName = user.getFullName();
+                }
+                
+                userImagePath = UserConstants.getPortraitURL(baseImagePath, user.isMale(), user.getPortraitId());
+                
+                LOG.debug(String.format("User full name: %s, User image path: %s", userName, userImagePath));
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+            
             loggedUserMap.put(resource.session().getId(), new UserData(userName, userImagePath));
+            
             /* listens to disconnection event */
             resource.addEventListener(new WhiteBoardResourceEventListener(loggedUserMap, sessionId));
         }

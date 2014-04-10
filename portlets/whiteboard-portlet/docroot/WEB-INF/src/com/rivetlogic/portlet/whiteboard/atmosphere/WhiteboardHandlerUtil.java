@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 public class WhiteboardHandlerUtil {
     
     public static final String SESSIONID = "sessionId";
+    public static final String GUEST_USER_NAME_LABEL = "rivetlogic.whiteboard.guest.name.label";
     
     /* ACTIONS */
     public static final String CREATE = "create";
@@ -42,6 +43,7 @@ public class WhiteboardHandlerUtil {
     public static final String USERS = "users";
     public static final String TYPE = "type";
     public static final String USERNAME = "userName";
+    public static final String BASE_IMAGEPATH = "baseImagePath";
     public static final String USER_IMAGEPATH = "userImagePath";
     public static final String COMMANDS = "commands";
     public static final String CACHEID = "cacheId";
@@ -53,8 +55,7 @@ public class WhiteboardHandlerUtil {
     /* SHAPES */
     public static final String LINE = "line";
     public static final String CIRCLE = "circle";
-    public static final String PATH = "path";
-    
+    public static final String PATH = "path";    
     public static final int CIRCLE_RADIUS = 20; // circle radius needs to be set
                                                 // because js cant retrieve the
                                                 // circle radius from the shape

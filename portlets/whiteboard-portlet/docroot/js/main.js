@@ -33,10 +33,9 @@ AUI().use('multiuser-whiteboard', function(A) {
             textEditorNode: A.one('.whiteboard-portlet .text-editor'),
             editorId: (Liferay.ThemeDisplay.getUserId() + '-' + Math.floor((Math.random() * 10) + 100)),
             useAtmosphere: true,
-            userName: (Liferay.ThemeDisplay.getUserName() != '') ? Liferay.ThemeDisplay.getUserName() : 'Guest',
             onlineUsersTemplate: A.one('#users-online-template').get('innerHTML'),
             usersTooltipsTemplate: A.one('#user-tooltips-template').get('innerHTML'),
-            userImagePath: A.one('.whiteboard-portlet .profile-image-path').get('value'),
+            baseImagePath: Liferay.ThemeDisplay.getPathImage()
         });
         
     });
