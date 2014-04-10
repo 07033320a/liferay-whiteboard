@@ -73,7 +73,7 @@
 }
 
 /* menu */
-.whiteboard-portlet menu {
+.whiteboard-portlet .editor menu {
     position: absolute;
     left: 0;
     top: 0;
@@ -81,33 +81,33 @@
     padding: 5px;
 }
 
-.whiteboard-portlet menu .btn.selected {
+.whiteboard-portlet .editor menu .btn.selected {
     background: #CCCBCB;
 }
 
-.whiteboard-portlet menu button {
+.whiteboard-portlet .editor menu button {
     width: 55px;
 }
 
-.whiteboard-portlet menu button span {
+.whiteboard-portlet .editor  menu button span {
     text-indent: -9999px;
     display: block;
     height: 20px;
 }
 
-.whiteboard-portlet menu button[data-shape="rectangle"] span {
+.whiteboard-portlet .editor menu button[data-shape="rectangle"] span {
     background: url(../images/rectangle.gif) center no-repeat;
 }
 
-.whiteboard-portlet menu button[data-shape="line"] span {
+.whiteboard-portlet .editor menu button[data-shape="line"] span {
     background: url(../images/line.gif) center no-repeat;
 }
 
-.whiteboard-portlet menu button[data-shape="circle"] span {
+.whiteboard-portlet .editor  menu button[data-shape="circle"] span {
     background: url(../images/circle.gif) center no-repeat;
 }
 
-.whiteboard-portlet menu button[data-shape="text"] span {
+.whiteboard-portlet .editor menu button[data-shape="text"] span {
     background: url(../images/text.gif) center no-repeat;
 }
 
