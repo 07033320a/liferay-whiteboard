@@ -17,6 +17,8 @@
 
 package com.rivetlogic.portlet.whiteboard.atmosphere;
 
+import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
+import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -55,11 +57,37 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
     private static final String ENCODING = "UTF-8";
     private static final String DUMP_MESSAGE = "dump";
     private static final Log LOG = LogFactoryUtil.getLog(WhiteboardHandler.class);
-    private final ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
-    private final ConcurrentMap<String, JSONObject> whiteBoardDump = new ConcurrentSkipListMap<String, JSONObject>();
+    public static final String CACHE_NAME = WhiteboardHandler.class.getName();
+    @SuppressWarnings("rawtypes")
+    private static PortalCache _portalCache = MultiVMPoolUtil.getCache(CACHE_NAME);
+    
+    @SuppressWarnings("unchecked")
+    private ConcurrentMap<String, UserData> getLoggedUsersMap() {
+        
+        Object object = _portalCache.get(WhiteboardHandlerUtil.LOGGED_USERS_MAP_KEY);
+        ConcurrentMap<String, UserData> loggedUserMap = (ConcurrentMap<String, UserData>) object;
+        if (null == loggedUserMap) {
+            loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
+            _portalCache.put(WhiteboardHandlerUtil.LOGGED_USERS_MAP_KEY, loggedUserMap);
+        }
+        return loggedUserMap;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private ConcurrentMap<String, JSONObject> getWhiteBoardDump() {
+        Object object = _portalCache.get(WhiteboardHandlerUtil.WHITEBOARD_DUMP_KEY);
+        ConcurrentMap<String, JSONObject> whiteBoardDump = (ConcurrentMap<String, JSONObject>) object;
+        if (null == whiteBoardDump) {
+            whiteBoardDump = new ConcurrentSkipListMap<String, JSONObject>();
+            _portalCache.put(WhiteboardHandlerUtil.WHITEBOARD_DUMP_KEY, whiteBoardDump);
+        }
+        return whiteBoardDump;
+    }
     
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
+        
+        ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap();
         
         String userName = StringPool.BLANK;
         String userImagePath = StringPool.BLANK;
@@ -101,6 +129,9 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
     
     @Override
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
+        
+        ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap();
+        ConcurrentMap<String, JSONObject> whiteBoardDump = getWhiteBoardDump();
         
         /* messages broadcasting */
         if (event.isSuspended()) {

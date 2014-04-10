@@ -30,6 +30,8 @@ public class WhiteboardHandlerUtil {
     
     public static final String SESSIONID = "sessionId";
     public static final String GUEST_USER_NAME_LABEL = "rivetlogic.whiteboard.guest.name.label";
+    public static final String LOGGED_USERS_MAP_KEY = "rivetlogic.whiteboard.logged.users.map";
+    public static final String WHITEBOARD_DUMP_KEY = "rivetlogic.whiteboard.dump.map";
     
     /* ACTIONS */
     public static final String CREATE = "create";
