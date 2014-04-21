@@ -18,13 +18,20 @@
 YUI.add('text-editor', function (Y, NAME) {
     
     var EVT_TEXT_EDITED = 'text-editor:textedited';
+    var CURRENT_TEXT_COMPONENT = 'currentTextComponent';
+    var TEXT_EDITOR_NODE =  'textEditorNode';
+    var TEXT_EDITOR = 'textEditor';
+    var SELECTOR_CANCEL_BUTTON = '.cancel';
+    var SELECTOR_EDIT_BUTTON = '.edit';
+    var SELECTOR_TEXT = '.text';
+    var TEXT_EDITOR_HEADER_LABEL = 'rivetlogic.whiteboard.edit.text';
     
     var TextEditor = Y.Base.create('text-editor', Y.Base, [], {
         
         initializer: function () {
             var panel = new Y.Panel({
-                srcNode: this.get('textEditorNode'),
-                headerContent: Liferay.Language.get('rivetlogic.whiteboard.edit.text'),
+                srcNode: this.get(TEXT_EDITOR_NODE),
+                headerContent: Liferay.Language.get(TEXT_EDITOR_HEADER_LABEL),
                 width: 250,
                 zIndex: 10000,
                 centered: true,
@@ -33,20 +40,20 @@ YUI.add('text-editor', function (Y, NAME) {
                 render: true,
                 plugins: [Y.Plugin.Drag]
             });
-            this.set('textEditor', panel);
+            this.set(TEXT_EDITOR, panel);
             this.bindTextEditor();
         },
         
         bindTextEditor: function() {
             var instance = this;
-            this.get('textEditorNode').one('.cancel').on('click', function() {
-                instance.get('textEditor').hide();
+            this.get(TEXT_EDITOR_NODE).one(SELECTOR_CANCEL_BUTTON).on('click', function() {
+                instance.get(TEXT_EDITOR).hide();
             });
-            this.get('textEditorNode').one('.edit').on('click', function() {
-                instance.get('currentTextComponent').text = instance.get('textEditorNode').one('.text').get('value');
-                instance.get('currentTextComponent').fire('modified');
+            this.get(TEXT_EDITOR_NODE).one(SELECTOR_EDIT_BUTTON).on('click', function() {
+                instance.get(CURRENT_TEXT_COMPONENT).text = instance.get(TEXT_EDITOR_NODE).one(SELECTOR_TEXT).get('value');
+                instance.get(CURRENT_TEXT_COMPONENT).fire('modified');
                 instance.fire(EVT_TEXT_EDITED);
-                instance.get('textEditor').hide();
+                instance.get(TEXT_EDITOR).hide();
             });
         },
         
@@ -55,9 +62,9 @@ YUI.add('text-editor', function (Y, NAME) {
          * 
          */
         editText: function(textComponent) {
-            this.set('currentTextComponent', textComponent);
-            this.get('textEditor').show();
-            this.get('textEditorNode').one('.text').set('value', textComponent.text);
+            this.set(CURRENT_TEXT_COMPONENT, textComponent);
+            this.get(TEXT_EDITOR).show();
+            this.get(TEXT_EDITOR_NODE).one(SELECTOR_TEXT).set('value', textComponent.text);
         }
     }, {
         ATTRS: {
