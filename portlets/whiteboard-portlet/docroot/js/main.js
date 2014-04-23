@@ -27,7 +27,7 @@ AUI().use('multiuser-whiteboard', function(A) {
     	var SELECTOR_USER_TOOLTIPS_TEMPLATE = '#user-tooltips-template';
     	var CANVAS_NAME = 'editor-canvas';
     	var SPACE = ' ';
-    	var DASH = ' ';
+    	var DASH = '-';
     	
         var containerWidth = A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_EDITOR).get('offsetWidth');
         A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_CANVAS).setAttribute('width', containerWidth);
