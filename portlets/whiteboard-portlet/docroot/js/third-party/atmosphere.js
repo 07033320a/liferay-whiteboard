@@ -35,7 +35,7 @@
 
     "use strict";
 
-    var version = "2.1.6-javascript",
+    var version = "2.1.5-javascript",
         atmosphere = {},
         guid,
         requests = [],
@@ -1280,8 +1280,7 @@
                             _response.messages = [];
                         }
                     } else {
-                        message = _handleProtocol(_request, message);
-                        if (message === "")
+                        if (!_handleProtocol(_request, message))
                             return;
 
                         _response.responseBody = message;
@@ -1384,37 +1383,29 @@
 
             function _handleProtocol(request, message) {
 
-                var nMessage = message;
-                if (request.transport === 'polling') return nMessage;
+                // The first messages is always the uuid.
+                var b = true;
+
+                if (request.transport === 'polling') return b;
 
                 if (atmosphere.util.trim(message).length !== 0 && request.enableProtocol && request.firstMessage) {
                     request.firstMessage = false;
                     var messages = message.split(request.messageDelimiter);
-                    var pos = request.trackMessageLength ? 1 : 0;
+                    var pos = messages.length === 2 ? 0 : 1;
                     request.uuid = atmosphere.util.trim(messages[pos]);
                     request.stime = atmosphere.util.trim(messages[pos + 1]);
+                    b = false;
                     if (request.transport !== 'long-polling') {
                         _triggerOpen(request);
                     }
                     uuid = request.uuid;
-                    nMessage = "";
-
-                    // We have trailing messages
-                    pos = request.trackMessageLength ? 3 : 2;
-                    if (messages.length > pos + 1) {
-                        for (var i = pos; i < messages.length; i++) {
-                            nMessage += messages[i];
-                            if (i + 1 !== messages.length) {
-                                nMessage += request.messageDelimiter;
-                            }
-                        }
-                    }
                 } else if (request.enableProtocol && request.firstMessage) {
                     // In case we are getting some junk from IE
+                    b = false;
                 } else {
                     _triggerOpen(request);
                 }
-                return atmosphere.util.trim(nMessage);
+                return b;
             }
 
             function _timeout(_request) {
@@ -1456,11 +1447,10 @@
              * @param response
              */
             function _trackMessageSize(message, request, response) {
-                message = _handleProtocol(request, message);
+                if (!_handleProtocol(request, message))
+                    return true;
                 if (message.length === 0)
                     return true;
-
-                response.responseBody = message;
 
                 if (request.trackMessageLength) {
                     // prepend partialMessage if any
@@ -2365,7 +2355,6 @@
                     dispatchUrl: _request.dispatchUrl,
                     enableProtocol: false,
                     messageDelimiter: '|',
-                    trackMessageLength: _request.trackMessageLength,
                     maxReconnectOnClose: _request.maxReconnectOnClose
                 };
 
@@ -2754,9 +2743,9 @@
 
         trim: function (str) {
             if (!String.prototype.trim) {
-                return str ? str.toString().replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, "").replace(/\s+/g, " ") : '';
+                return str.toString().replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, "").replace(/\s+/g, " ");
             } else {
-                return str ? str.toString().trim() : '';
+                return str.toString().trim();
             }
         },
 
@@ -2796,13 +2785,13 @@
         },
 
         storage: function () {
-            try {
-                return !!(window.localStorage && window.StorageEvent);
-            } catch (e) {
-                //Firefox throws an exception here, see 
-                //https://bugzilla.mozilla.org/show_bug.cgi?id=748620
-                return false;
-            }
+        	try {
+        		return !!(window.localStorage && window.StorageEvent);
+        	} catch (e) {
+        		//Firefox throws an exception here, see 
+        		//https://bugzilla.mozilla.org/show_bug.cgi?id=748620
+        		return false;
+        	}
         },
 
         iterate: function (fn, interval) {
