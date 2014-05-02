@@ -142,7 +142,7 @@ public class WhiteboardHandlerUtil {
                                 
                             } else if (command.getString(TYPE).equals(PATH)) {
                                 
-                                cachedCommand.getJSONObject(STATE).put(OPTIONS, command.getJSONObject(STATE));
+                                cachedCommand.getJSONObject(STATE).put(OPTIONS, command.getJSONObject(STATE).getJSONObject(OPTIONS));
                                 
                             } else {
                                 
