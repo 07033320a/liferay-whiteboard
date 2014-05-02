@@ -72,7 +72,8 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
                 url: baseUrl + '/delegate/collaboration-whiteboard/?baseImagePath=' +
                     encodeURIComponent(instance.get('baseImagePath')),
                 trackMessageLength: true,
-                transport: 'websocket'
+                transport: 'websocket',
+                //logLevel: 'debug',
             };
 
             request.onMessage = function (response) {
@@ -92,7 +93,7 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
             };
             
             request.onClose = function (response) {
-                instance.disconnectedModalMessage.show();
+                //instance.disconnectedModalMessage.show();
             };
             
             instance.set(COMM, atmosphere.subscribe(request));

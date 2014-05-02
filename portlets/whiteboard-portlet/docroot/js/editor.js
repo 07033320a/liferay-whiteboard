@@ -47,19 +47,32 @@ YUI.add('whiteboard', function (Y, NAME) {
                 EditorManager.CONSTANTS.RECTANGLE_STATE.stroke = e.color;
                 EditorManager.CONSTANTS.CIRCLE_STATE.stroke = e.color;
                 EditorManager.CONSTANTS.LINE_STATE.options.stroke = e.color;
-                if (instance.get(SELECTED_SHAPE) && instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT) {
-                    instance.get(SELECTED_SHAPE).stroke = e.color;
+                EditorManager.CONSTANTS.PATH_STATE.stroke = e.color;  
+                // Text color is actually the fill. PRobably it would need a separate control.
+                // We are going to use stroke control for now, because it is intuitive
+                EditorManager.CONSTANTS.TEXT_STATE.fill = e.color;
+                
+                if (instance.get(SELECTED_SHAPE)){
+                	if (instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT){
+                		instance.get(SELECTED_SHAPE).stroke = e.color;
+                	}
+                	else{
+                		instance.get(SELECTED_SHAPE).fill = e.color;
+                	}
                     instance.get(SELECTED_SHAPE).fire('modified');
                     instance.get(CANVAS).renderAll();
                 }
+                if (instance.get(CANVAS).isDrawingMode){
+            		instance.get(CANVAS).freeDrawingBrush.color = e.color;
+            	}
             });
             
             var fillColorPicker = new Y.ColorPicker({container: this.get(CONTAINER).one('.color-picker.fill')});
             fillColorPicker.on('color-picker:change', function(e) {
                 EditorManager.CONSTANTS.RECTANGLE_STATE.fill = e.color;
-                EditorManager.CONSTANTS.CIRCLE_STATE.fill = e.color;
-                if (instance.get(SELECTED_SHAPE) && instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT 
-                        && instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.PATH) {
+                EditorManager.CONSTANTS.CIRCLE_STATE.fill = e.color;                
+                if (instance.get(SELECTED_SHAPE) && instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.PATH
+                	&& instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT) {
                     instance.get(SELECTED_SHAPE).fill = e.color;
                     instance.get(SELECTED_SHAPE).fire('modified');
                     instance.get(CANVAS).renderAll();
@@ -82,6 +95,7 @@ YUI.add('whiteboard', function (Y, NAME) {
                 if (!hasClass) {
                     this.toggleClass(CLASS_SELECTED);
                 }
+                instance.get(CANVAS).freeDrawingBrush.color = EditorManager.CONSTANTS.PATH_STATE.stroke;
                 instance.get(CANVAS).isDrawingMode = this.hasClass(CLASS_SELECTED);
             });
             
@@ -162,12 +176,12 @@ YUI.add('whiteboard', function (Y, NAME) {
                 }
             }
             if (command.type == EditorManager.CONSTANTS.PATH) {
-                state = command.state;
+                state = command.state || EditorManager.CONSTANTS.PATH_STATE;
                 shape = path;
                 /* if path was created from other user create the path */
                 if (command.remotelyTriggered) {
                     shape = new fabric.Path(command.state.path);
-                    shape.set(command.state.options);
+                    shape.set(state.options);
                     shape.setCoords();
                 }
             }
@@ -424,7 +438,11 @@ YUI.add('whiteboard', function (Y, NAME) {
         TEXT_STATE: {
             left: 100,
             top: 100,
-            fontSize: 16
+            fontSize: 16,
+            fill: '#000000',
+        },
+        PATH_STATE: {
+        	stroke: '#000000',
         }
     };
 
