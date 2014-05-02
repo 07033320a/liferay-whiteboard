@@ -156,7 +156,7 @@ YUI.add('whiteboard', function (Y, NAME) {
                     return;
                 }
                 state = command.state || EditorManager.CONSTANTS.TEXT_STATE;
-                shape = new fabric.Text(EditorManager.CONSTANTS.TEXT, state);
+                shape = new fabric.Text('', state);
                 if (!command.remotelyTriggered) {
                     this.editText(shape);
                 }
