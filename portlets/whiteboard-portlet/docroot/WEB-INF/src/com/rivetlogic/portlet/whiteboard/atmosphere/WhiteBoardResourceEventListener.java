@@ -23,63 +23,60 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
 
-public class WhiteBoardResourceEventListener implements
-        AtmosphereResourceEventListener {
+public class WhiteBoardResourceEventListener implements AtmosphereResourceEventListener {
     
     /**
      * List of logged users
-     * 
      */
-    private  ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
+    private ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
     
     /**
      * Relates current connected user with the list of users
      */
     private String sessionId = null;
     
-    
-    public WhiteBoardResourceEventListener(
-            ConcurrentMap<String, UserData> loggedUserMap, String sessionId) {
+    public WhiteBoardResourceEventListener(ConcurrentMap<String, UserData> loggedUserMap, String sessionId) {
+        
         super();
         this.loggedUserMap = loggedUserMap;
         this.sessionId = sessionId;
     }
-
+    
     @Override
-    public void onBroadcast(AtmosphereResourceEvent arg0) {
-
-    }
-
-    @Override
-    public void onClose(AtmosphereResourceEvent arg0) {
-
-    }
-
-    @Override
-    public void onDisconnect(AtmosphereResourceEvent arg0) {
-        /* removes user from map and broadcast users list again */
-        this.loggedUserMap.remove(sessionId);
-        arg0.getResource().getBroadcaster().broadcast(WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap));
-    }
-
-    @Override
-    public void onPreSuspend(AtmosphereResourceEvent arg0) {
+    public void onBroadcast(AtmosphereResourceEvent event) {
         
     }
-
+    
     @Override
-    public void onResume(AtmosphereResourceEvent arg0) {
-
+    public void onClose(AtmosphereResourceEvent event) {
+        
     }
-
+    
     @Override
-    public void onSuspend(AtmosphereResourceEvent arg0) {
-
+    public void onDisconnect(AtmosphereResourceEvent event) {
+        
+        /* removes user from map and broadcast users list again */
+        this.loggedUserMap.remove(sessionId);
+        event.getResource().getBroadcaster().broadcast(WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap));
     }
-
+    
     @Override
-    public void onThrowable(AtmosphereResourceEvent arg0) {
-
+    public void onPreSuspend(AtmosphereResourceEvent event) {
+        
     }
-
+    
+    @Override
+    public void onResume(AtmosphereResourceEvent event) {
+        
+    }
+    
+    @Override
+    public void onSuspend(AtmosphereResourceEvent event) {
+        
+    }
+    
+    @Override
+    public void onThrowable(AtmosphereResourceEvent event) {
+        
+    }   
 }

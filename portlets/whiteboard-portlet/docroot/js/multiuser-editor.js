@@ -20,6 +20,14 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
     var onlineUsersTemplateFn = null;
     var usersTooltipsTemplateFn = null;
     
+    var CONTAINER = 'container';
+    var COMMANDS = 'commands';
+    var COMM = 'comm';
+    var JOINING = 'joining';
+    var EDITOR_ID = 'editorId';
+    var SELECTOR_USERS_ONLINE = '.users-online';
+    var SELECTOR_USER_MOD_TOOLTIPS = '.user-modification-tooltips';
+    
     var MultiuserEditor = Y.Base.create('multiuser-whiteboard', Y.EditorManager, [], {
         
         disconnectedModalMessage: null,
@@ -31,14 +39,14 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
             usersTooltipsTemplateFn = Y.Handlebars.compile(this.get('usersTooltipsTemplate'));
             
             this.bindCommEvents();
-            this.get('container').one('.users-online .expand-collapse-btn').on('click', function(e) {
-                instance.get('container').one('.users-online .expand-collapse-btn').toggleClass('selected');
-                instance.get('container').one('.users-online .users-online-wrapper').toggleClass('show');
+            this.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .expand-collapse-btn').on('click', function(e) {
+                instance.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .expand-collapse-btn').toggleClass('selected');
+                instance.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .users-online-wrapper').toggleClass('show');
             });
             this.disconnectedModalMessage = new Y.Modal({
-                bodyContent: 'Connection issues detected, please try to <a href="javascript:window.location.reload()">reload</a> page',
+                bodyContent: Liferay.Language.get('rivetlogic.whiteboard.connection.issues.message'),
                 centered: true,
-                headerContent: 'Collaboration\'s Whiteboard',
+                headerContent: Liferay.Language.get('rivetlogic.whiteboard.message.title'),
                 modal: true,
                 visible: false,
                 width: 450,
@@ -61,40 +69,41 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
             var instance = this;
             var baseUrl = document.location.toString().split('/').slice(0, 3).join('/'); // gets only protocol, domain and port from current url
             var request = {
-                url: baseUrl + '/delegate/collaboration-whiteboard/?userName=' + instance.get('userName') + '&userImagePath=' +
-                    encodeURIComponent(instance.get('userImagePath')),
+                url: baseUrl + '/delegate/collaboration-whiteboard/?baseImagePath=' +
+                    encodeURIComponent(instance.get('baseImagePath')),
                 trackMessageLength: true,
-                transport: 'websocket'
+                transport: 'websocket',
+                //logLevel: 'debug',
             };
 
             request.onMessage = function (response) {
                 instance.processMessage(function(data) {
                     instance.executeCommands(data.commands);
                     /* if user is currently joining the whiteboard, load the whiteboard  dump to show shapes previously created */
-                    if (instance.get('joining')) {
+                    if (instance.get(JOINING)) {
                         instance.executeCommands(data.dump);
-                        instance.set('joining', false);
+                        instance.set(JOINING, false);
                     }
                 }, Y.JSON.parse(response.responseBody));
             };
             request.onOpen = function (response) {
-                instance.get('comm').push(Y.JSON.stringify({
+                instance.get(COMM).push(Y.JSON.stringify({
                     type:  MultiuserEditor.CONSTANTS.LOGIN
                 }));
             };
             
             request.onClose = function (response) {
-                instance.disconnectedModalMessage.show();
+                //instance.disconnectedModalMessage.show();
             };
             
-            instance.set('comm', atmosphere.subscribe(request));
+            instance.set(COMM, atmosphere.subscribe(request));
             /* broadcast */
             window.setInterval(function () {
-                if (!instance.get('commands').length) {
+                if (!instance.get(COMMANDS).length) {
                     return;
                 }
-                instance.get('comm').push(instance.stringifyCommands()); /* stringify not supported on old browsers */
-                instance.set('commands', []);
+                instance.get(COMM).push(instance.stringifyCommands()); /* stringify not supported on old browsers */
+                instance.set(COMMANDS, []);
             }, MultiuserEditor.CONSTANTS.BROADCAST_INTERVAL);
         },
         
@@ -104,7 +113,7 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
          * 
          */
         processMessage: function(callback, data) {
-            if (data.editorId != this.get('editorId')) {
+            if (data.editorId != this.get(EDITOR_ID)) {
                 callback(data);
             }
         },
@@ -116,8 +125,8 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
          * 
          */
         stringifyCommands: function() {
-            var commands = this.addUserTooltipCommand(this.get('commands'));
-            return Y.JSON.stringify({editorId: this.get('editorId'), commands: commands});
+            var commands = this.addUserTooltipCommand(this.get(COMMANDS));
+            return Y.JSON.stringify({editorId: this.get(EDITOR_ID), commands: commands});
         },
         
         /**
@@ -133,7 +142,7 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
                 if (state && state.top && state.left) {
                     commands.push({
                         action: MultiuserEditor.CONSTANTS.TOOLTIP,
-                        id: this.get('editorId'),
+                        id: this.get(EDITOR_ID),
                         userName: this.get('userName'),
                         userImagePath: this.get('userImagePath'),
                         top: state.top - 55, // decrease top to avoid overlapping with the shape
@@ -166,18 +175,18 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
                     cachedShape.remove();
                 }
                 if (command.action == MultiuserEditor.CONSTANTS.USERS) {
-                    this.get('container').one('.users-online .count').set('text', command.users.length);
-                    this.get('container').one('.users-online .bd').empty();
-                    this.get('container').one('.users-online .bd').append(onlineUsersTemplateFn(command));
-                    this.get('container').one('.user-modification-tooltips').empty();
+                    this.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .count').set('text', command.users.length);
+                    this.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .bd').empty();
+                    this.get(CONTAINER).one(SELECTOR_USERS_ONLINE + ' .bd').append(onlineUsersTemplateFn(command));
+                    this.get(CONTAINER).one(SELECTOR_USER_MOD_TOOLTIPS).empty();
                 }
                 if (command.action == MultiuserEditor.CONSTANTS.TOOLTIP) {
-                    var userTooltipNode = this.get('container').one('.user-modification-tooltips #' + command.id);
+                    var userTooltipNode = this.get(CONTAINER).one(SELECTOR_USER_MOD_TOOLTIPS+' #' + command.id);
                     if (userTooltipNode) {
                         userTooltipNode.setStyles({top: command.top + 'px', left: command.left + 'px'}); 
                     } else {
-                        this.get('container').one('.user-modification-tooltips').append(usersTooltipsTemplateFn(command)); 
-                        userTooltipNode = this.get('container').one('.user-modification-tooltips #' + command.id);
+                        this.get(CONTAINER).one(SELECTOR_USER_MOD_TOOLTIPS).append(usersTooltipsTemplateFn(command)); 
+                        userTooltipNode = this.get(CONTAINER).one(SELECTOR_USER_MOD_TOOLTIPS+' #' + command.id);
                     }
                     this.animateTooltip(userTooltipNode);
                 }
@@ -233,14 +242,6 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
             },
             
             /**
-             * Username to be displayed to the other users
-             * 
-             */
-            userName: {
-                value: ''
-            },
-            
-            /**
              * Online users list html  template
              * 
              */
@@ -268,7 +269,7 @@ YUI.add('multiuser-whiteboard', function (Y, NAME) {
              * Profile image path
              * 
              */
-            userImagePath: {
+            baseImagePath: {
                 value: ''
             }
             

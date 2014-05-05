@@ -17,9 +17,23 @@
 
 package com.rivetlogic.portlet.whiteboard.atmosphere;
 
+import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
+import com.liferay.portal.kernel.cache.PortalCache;
+import com.liferay.portal.kernel.json.JSONException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.User;
+import com.liferay.portal.model.UserConstants;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.util.PortalUtil;
+
 import java.io.IOException;
 import java.net.URLDecoder;
-
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -28,56 +42,101 @@ import org.atmosphere.config.service.AtmosphereHandlerService;
 import org.atmosphere.config.service.Singleton;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
-
 import org.atmosphere.handler.AtmosphereHandlerAdapter;
 import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
 import org.atmosphere.interceptor.BroadcastOnPostAtmosphereInterceptor;
 import org.atmosphere.interceptor.SuspendTrackerInterceptor;
 import org.atmosphere.util.SimpleBroadcaster;
 
-import com.liferay.portal.kernel.json.JSONException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
-
 @Singleton
-@AtmosphereHandlerService(path = "/",
-        supportSession = true,
-        interceptors = {
-        AtmosphereResourceLifecycleInterceptor.class,
-        TrackMessageSizeInterceptor.class,
-        BroadcastOnPostAtmosphereInterceptor.class,
-        SuspendTrackerInterceptor.class }, broadcaster = SimpleBroadcaster.class)
+@AtmosphereHandlerService(path = "/", supportSession = true, interceptors = {
+        AtmosphereResourceLifecycleInterceptor.class, TrackMessageSizeInterceptor.class,
+        BroadcastOnPostAtmosphereInterceptor.class, SuspendTrackerInterceptor.class }, broadcaster = SimpleBroadcaster.class)
 public class WhiteboardHandler extends AtmosphereHandlerAdapter {
     
+    private static final String ENCODING = "UTF-8";
+    private static final String DUMP_MESSAGE = "dump";
     private static final Log LOG = LogFactoryUtil.getLog(WhiteboardHandler.class);
-
-    private final ConcurrentMap<String, UserData> loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
+    public static final String CACHE_NAME = WhiteboardHandler.class.getName();
+    @SuppressWarnings("rawtypes")
+    private static PortalCache _portalCache = MultiVMPoolUtil.getCache(CACHE_NAME);
     
-    private final ConcurrentMap<String, JSONObject> whiteBoardDump = new ConcurrentSkipListMap<String, JSONObject>();
+    @SuppressWarnings("unchecked")
+    private ConcurrentMap<String, UserData> getLoggedUsersMap() {
+        
+        Object object = _portalCache.get(WhiteboardHandlerUtil.LOGGED_USERS_MAP_KEY);
+        ConcurrentMap<String, UserData> loggedUserMap = (ConcurrentMap<String, UserData>) object;
+        if (null == loggedUserMap) {
+            loggedUserMap = new ConcurrentSkipListMap<String, UserData>();
+            _portalCache.put(WhiteboardHandlerUtil.LOGGED_USERS_MAP_KEY, loggedUserMap);
+        }
+        return loggedUserMap;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private ConcurrentMap<String, JSONObject> getWhiteBoardDump() {
+        Object object = _portalCache.get(WhiteboardHandlerUtil.WHITEBOARD_DUMP_KEY);
+        ConcurrentMap<String, JSONObject> whiteBoardDump = (ConcurrentMap<String, JSONObject>) object;
+        if (null == whiteBoardDump) {
+            whiteBoardDump = new ConcurrentSkipListMap<String, JSONObject>();
+            _portalCache.put(WhiteboardHandlerUtil.WHITEBOARD_DUMP_KEY, whiteBoardDump);
+        }
+        return whiteBoardDump;
+    }
     
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {
+        
+        ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap();
+        
+        String userName = StringPool.BLANK;
+        String userImagePath = StringPool.BLANK;
+        
         // user joined
         String sessionId = resource.session().getId();
         if (loggedUserMap.get(sessionId) == null) {
-            String userImagePath = URLDecoder.decode(resource.getRequest().getParameter(WhiteboardHandlerUtil.USER_IMAGEPATH), "UTF-8");
-            String userName = resource.getRequest().getParameter(WhiteboardHandlerUtil.USERNAME);
+            
+            try {
+                
+                String baseImagePath = URLDecoder.decode(
+                        resource.getRequest().getParameter(WhiteboardHandlerUtil.BASE_IMAGEPATH), ENCODING);
+                LOG.debug("base image path " + baseImagePath);
+                
+                User user = PortalUtil.getUser(resource.getRequest());
+                long companyId = PortalUtil.getCompanyId(resource.getRequest());
+                
+                if (user == null || user.isDefaultUser()) {
+                    LOG.debug("This is guest user");
+                    user = UserLocalServiceUtil.getDefaultUser(companyId);
+                    userName = LanguageUtil.get(LocaleUtil.getDefault(), WhiteboardHandlerUtil.GUEST_USER_NAME_LABEL);
+                } else {
+                    userName = user.getFullName();
+                }
+                
+                userImagePath = UserConstants.getPortraitURL(baseImagePath, user.isMale(), user.getPortraitId());
+                
+                LOG.debug(String.format("User full name: %s, User image path: %s", userName, userImagePath));
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+            
             loggedUserMap.put(resource.session().getId(), new UserData(userName, userImagePath));
+            
             /* listens to disconnection event */
             resource.addEventListener(new WhiteBoardResourceEventListener(loggedUserMap, sessionId));
         }
     }
-
+    
     @Override
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
-
+        
+        ConcurrentMap<String, UserData> loggedUserMap = getLoggedUsersMap();
+        ConcurrentMap<String, JSONObject> whiteBoardDump = getWhiteBoardDump();
+        
         /* messages broadcasting */
         if (event.isSuspended()) {
             String message = event.getMessage() == null ? StringPool.BLANK : event.getMessage().toString();
-           
+            
             if (!message.equals(StringPool.BLANK)) {
                 
                 try {
@@ -86,23 +145,19 @@ public class WhiteboardHandler extends AtmosphereHandlerAdapter {
                     if (WhiteboardHandlerUtil.LOGIN.equals(jsonMessage.getString(WhiteboardHandlerUtil.TYPE))) {
                         JSONObject usersLoggedMessage = WhiteboardHandlerUtil.generateLoggedUsersJSON(loggedUserMap);
                         /* adds whiteboard dump to the message */
-                        usersLoggedMessage.put("dump", WhiteboardHandlerUtil.loadWhiteboardDump(whiteBoardDump));
+                        usersLoggedMessage.put(DUMP_MESSAGE, WhiteboardHandlerUtil.loadWhiteboardDump(whiteBoardDump));
                         event.getResource().getBroadcaster().broadcast(usersLoggedMessage);
                     } else {
                         /* just broadcast the message */
-                        LOG.info("Broadcasting = " + message);
+                        LOG.debug("Broadcasting = " + message);
                         /* adds whiteboard updates to the dump */
                         WhiteboardHandlerUtil.persistWhiteboardDump(whiteBoardDump, jsonMessage);
                         event.getResource().write(message);
                     }
                 } catch (JSONException e) {
-                    LOG.info("JSON parse failed");
+                    LOG.debug("JSON parse failed");
                 }
             }
-            
         }
-        
     }
-
-
 }

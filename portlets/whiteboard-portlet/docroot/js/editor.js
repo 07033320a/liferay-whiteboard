@@ -17,6 +17,20 @@
 
 YUI.add('whiteboard', function (Y, NAME) {
     
+	var CONTAINER = 'container';
+	var MENU = 'menu';
+	var SELECTED_SHAPE = 'selectedShape';
+	var CANVAS = 'canvas';
+	var CLASS_SELECTED= 'selected';
+	var CACHE = 'cache';
+	var CLEANING = 'cleaning';
+	var COUNT = 'count';
+	var SELECTOR_BUTTON = '.btn';
+	var SELECTOR_BUTTON_ADD = '.btn.add';
+	var SELECTOR_DELETE = '.delete';
+	var SELECTOR_FREE = '.free';
+	var SELECTOR_CLEAN = '.clean';
+	
     var EditorManager = Y.Base.create('whiteboard', Y.Base, [Y.TextEditor], {
         
         initializer: function () {
@@ -25,66 +39,80 @@ YUI.add('whiteboard', function (Y, NAME) {
         
         bindUI: function () {
             var instance = this;
-            var menu = this.get('container').one('menu');
+            var menu = this.get(CONTAINER).one(MENU);
             
             /* listens color pickers */
-            var strokeColorPicker = new Y.ColorPicker({container: this.get('container').one('.color-picker.stroke')});
+            var strokeColorPicker = new Y.ColorPicker({container: this.get(CONTAINER).one('.color-picker.stroke')});
             strokeColorPicker.on('color-picker:change', function(e) {
                 EditorManager.CONSTANTS.RECTANGLE_STATE.stroke = e.color;
                 EditorManager.CONSTANTS.CIRCLE_STATE.stroke = e.color;
                 EditorManager.CONSTANTS.LINE_STATE.options.stroke = e.color;
-                if (instance.get('selectedShape') && instance.get('selectedShape').type != EditorManager.CONSTANTS.TEXT) {
-                    instance.get('selectedShape').stroke = e.color;
-                    instance.get('selectedShape').fire('modified');
-                    instance.get('canvas').renderAll();
+                EditorManager.CONSTANTS.PATH_STATE.stroke = e.color;  
+                // Text color is actually the fill. PRobably it would need a separate control.
+                // We are going to use stroke control for now, because it is intuitive
+                EditorManager.CONSTANTS.TEXT_STATE.fill = e.color;
+                
+                if (instance.get(SELECTED_SHAPE)){
+                	if (instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT){
+                		instance.get(SELECTED_SHAPE).stroke = e.color;
+                	}
+                	else{
+                		instance.get(SELECTED_SHAPE).fill = e.color;
+                	}
+                    instance.get(SELECTED_SHAPE).fire('modified');
+                    instance.get(CANVAS).renderAll();
                 }
+                if (instance.get(CANVAS).isDrawingMode){
+            		instance.get(CANVAS).freeDrawingBrush.color = e.color;
+            	}
             });
             
-            var fillColorPicker = new Y.ColorPicker({container: this.get('container').one('.color-picker.fill')});
+            var fillColorPicker = new Y.ColorPicker({container: this.get(CONTAINER).one('.color-picker.fill')});
             fillColorPicker.on('color-picker:change', function(e) {
                 EditorManager.CONSTANTS.RECTANGLE_STATE.fill = e.color;
-                EditorManager.CONSTANTS.CIRCLE_STATE.fill = e.color;
-                if (instance.get('selectedShape') && instance.get('selectedShape').type != EditorManager.CONSTANTS.TEXT 
-                        && instance.get('selectedShape').type != EditorManager.CONSTANTS.PATH) {
-                    instance.get('selectedShape').fill = e.color;
-                    instance.get('selectedShape').fire('modified');
-                    instance.get('canvas').renderAll();
+                EditorManager.CONSTANTS.CIRCLE_STATE.fill = e.color;                
+                if (instance.get(SELECTED_SHAPE) && instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.PATH
+                	&& instance.get(SELECTED_SHAPE).type != EditorManager.CONSTANTS.TEXT) {
+                    instance.get(SELECTED_SHAPE).fill = e.color;
+                    instance.get(SELECTED_SHAPE).fire('modified');
+                    instance.get(CANVAS).renderAll();
                 }
             });
             
             /* add shapes buttons  */
             menu.delegate('click', function (e) {
-                menu.all('.btn').removeClass('selected');
+                menu.all(SELECTOR_BUTTON).removeClass(CLASS_SELECTED);
                 instance.resetSelectedActions();
                 instance.createShape({
                     type: e.currentTarget.getAttribute('data-shape')
                 });
-            }, '.btn.add');
+            }, SELECTOR_BUTTON_ADD);
 
             /* free draw button */
-            menu.one('.free').on('click', function (e) {
-                var hasClass = this.hasClass('selected');
-                menu.all('.btn').removeClass('selected');
+            menu.one(SELECTOR_FREE).on('click', function (e) {
+                var hasClass = this.hasClass(CLASS_SELECTED);
+                menu.all(SELECTOR_BUTTON).removeClass(CLASS_SELECTED);
                 if (!hasClass) {
-                    this.toggleClass('selected');
+                    this.toggleClass(CLASS_SELECTED);
                 }
-                instance.get('canvas').isDrawingMode = this.hasClass('selected');
+                instance.get(CANVAS).freeDrawingBrush.color = EditorManager.CONSTANTS.PATH_STATE.stroke;
+                instance.get(CANVAS).isDrawingMode = this.hasClass(CLASS_SELECTED);
             });
             
             /* delete button */
-            menu.one('.delete').on('click', function (e) {
-                if (instance.get('selectedShape')) {
-                    instance.get('selectedShape').remove();
+            menu.one(SELECTOR_DELETE).on('click', function (e) {
+                if (instance.get(SELECTED_SHAPE)) {
+                    instance.get(SELECTED_SHAPE).remove();
                 }
             });
             
             /* clean button */
-            menu.one('.clean').on('click', function (e) {
+            menu.one(SELECTOR_CLEAN).on('click', function (e) {
                 instance.deleteAllShapes();
             });
             
             /* after free draw finished on mouse up */
-            this.get('canvas').on('path:created', function (e) {
+            this.get(CANVAS).on('path:created', function (e) {
                 var options = instance.retrieveShapeState(e.path);
                 delete options.path;
                 instance.createShape({
@@ -96,12 +124,12 @@ YUI.add('whiteboard', function (Y, NAME) {
                 }, e.path);
             });
             
-            this.get('canvas').on('selection:cleared', function(e) {
-                instance.set('selectedShape', null);
+            this.get(CANVAS).on('selection:cleared', function(e) {
+                instance.set(SELECTED_SHAPE, null);
             });
             
             this.on('text-editor:textedited', function(e) {
-                instance.get('canvas').renderAll();
+                instance.get(CANVAS).renderAll();
             });
         },
         
@@ -110,7 +138,7 @@ YUI.add('whiteboard', function (Y, NAME) {
          * 
          */
         resetSelectedActions: function() {
-            this.get('canvas').isDrawingMode = false;
+            this.get(CANVAS).isDrawingMode = false;
         },
         
         /**
@@ -137,23 +165,23 @@ YUI.add('whiteboard', function (Y, NAME) {
             }
             if (command.type == EditorManager.CONSTANTS.TEXT) {
                 /* if text button is clicked and text component is selected, edit it !!! */
-                if (instance.get('selectedShape') != null && instance.get('selectedShape').type == 'text' && !command.remotelyTriggered) {
-                    this.editText(instance.get('selectedShape'));
+                if (instance.get(SELECTED_SHAPE) != null && instance.get(SELECTED_SHAPE).type == 'text' && !command.remotelyTriggered) {
+                    this.editText(instance.get(SELECTED_SHAPE));
                     return;
                 }
                 state = command.state || EditorManager.CONSTANTS.TEXT_STATE;
-                shape = new fabric.Text(EditorManager.CONSTANTS.TEXT, state);
+                shape = new fabric.Text('', state);
                 if (!command.remotelyTriggered) {
                     this.editText(shape);
                 }
             }
             if (command.type == EditorManager.CONSTANTS.PATH) {
-                state = command.state;
+                state = command.state || EditorManager.CONSTANTS.PATH_STATE;
                 shape = path;
                 /* if path was created from other user create the path */
                 if (command.remotelyTriggered) {
                     shape = new fabric.Path(command.state.path);
-                    shape.set(command.state.options);
+                    shape.set(state.options);
                     shape.setCoords();
                 }
             }
@@ -161,14 +189,14 @@ YUI.add('whiteboard', function (Y, NAME) {
             if (shape) {
                 var cacheId = instance.addToCache(shape, command.cacheId || null);
                 
-                shape.on('selected', function () {
-                    instance.set('selectedShape', this);
+                shape.on(CLASS_SELECTED, function () {
+                    instance.set(SELECTED_SHAPE, this);
                 });
                 shape.on('removed', function () {
                     /* if shape still in cache */
                     if (instance.getShapeFromCache(cacheId)) {
                         instance.addToCommands(cacheId, EditorManager.CONSTANTS.DELETE, {}, {});
-                        if (!instance.get('cleaning')) {
+                        if (!instance.get(CLEANING)) {
                             instance.deleteShapeFromCache(cacheId);
                         }
                     }
@@ -188,7 +216,7 @@ YUI.add('whiteboard', function (Y, NAME) {
                  * also validation added to avoid path added twice to canvas
                  */
                 if (command.remotelyTriggered || (command.type != EditorManager.CONSTANTS.PATH)) {
-                    this.get('canvas').add(shape);
+                    this.get(CANVAS).add(shape);
                 }
                 
             }
@@ -205,7 +233,7 @@ YUI.add('whiteboard', function (Y, NAME) {
                 /* set shape object with new state properties */
                 cachedItem.object.set(command.state);
                 cachedItem.object.setCoords();
-                instance.get('canvas').renderAll();
+                instance.get(CANVAS).renderAll();
             });      
         },
         
@@ -214,12 +242,12 @@ YUI.add('whiteboard', function (Y, NAME) {
          * 
          */
         deleteAllShapes: function() {
-            var cache = this.get('cache');
-            this.set('cleaning', true);
+            var cache = this.get(CACHE);
+            this.set(CLEANING, true);
             Y.Array.each(cache, function(item) {
                 item.object.remove();
             });
-            this.set('cleaning', false);
+            this.set(CLEANING, false);
             cache = [];
         },
         
@@ -228,10 +256,10 @@ YUI.add('whiteboard', function (Y, NAME) {
          * 
          */
         deleteShapeFromCache: function(cacheId) {
-            var cache = this.get('cache');
+            var cache = this.get(CACHE);
             this.getItemFromCache(cacheId, Y.bind(function(cachedItem, index) {
                 cache.splice(index, 1);
-                this.set('cache', cache);
+                this.set(CACHE, cache);
                 return;
             }, this));
         },
@@ -245,7 +273,7 @@ YUI.add('whiteboard', function (Y, NAME) {
         },
 
         getItemFromCache: function(cacheId, callback) {
-            var cache = this.get('cache');
+            var cache = this.get(CACHE);
             for ( var i = 0; i < cache.length; i++) {
                 if (cache[i].id == cacheId) {
                     callback(cache[i], i);
@@ -259,9 +287,9 @@ YUI.add('whiteboard', function (Y, NAME) {
          * 
          */
         addToCache: function (object, cacheId) {
-            var cacheId = cacheId ? cacheId : (this.get('editorId') + this.get('count'));
-            this.set('count', this.get('count') + 1);
-            this.get('cache').push({
+            var cacheId = cacheId ? cacheId : (this.get('editorId') + this.get(COUNT));
+            this.set(COUNT, this.get(COUNT) + 1);
+            this.get(CACHE).push({
                 id: cacheId,
                 object: object
             });
@@ -410,7 +438,11 @@ YUI.add('whiteboard', function (Y, NAME) {
         TEXT_STATE: {
             left: 100,
             top: 100,
-            fontSize: 16
+            fontSize: 16,
+            fill: '#000000',
+        },
+        PATH_STATE: {
+        	stroke: '#000000',
         }
     };
 

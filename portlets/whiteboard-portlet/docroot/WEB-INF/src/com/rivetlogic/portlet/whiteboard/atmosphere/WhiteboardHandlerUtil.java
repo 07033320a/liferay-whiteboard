@@ -17,44 +17,50 @@
 
 package com.rivetlogic.portlet.whiteboard.atmosphere;
 
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
-
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
+
 public class WhiteboardHandlerUtil {
     
     public static final String SESSIONID = "sessionId";
+    public static final String GUEST_USER_NAME_LABEL = "rivetlogic.whiteboard.guest.name.label";
+    public static final String LOGGED_USERS_MAP_KEY = "rivetlogic.whiteboard.logged.users.map";
+    public static final String WHITEBOARD_DUMP_KEY = "rivetlogic.whiteboard.dump.map";
     
     /* ACTIONS */
     public static final String CREATE = "create";
     public static final String DELETE = "delete";
     public static final String LOGIN = "login";
     
-    /* JSON PROPERTIES*/
+    /* JSON PROPERTIES */
     public static final String STATE = "state";
     public static final String OPTIONS = "options";
     public static final String RADIUS = "radius";
     public static final String USERS = "users";
     public static final String TYPE = "type";
     public static final String USERNAME = "userName";
+    public static final String BASE_IMAGEPATH = "baseImagePath";
     public static final String USER_IMAGEPATH = "userImagePath";
     public static final String COMMANDS = "commands";
     public static final String CACHEID = "cacheId";
     public static final String ACTION = "action";
     public static final String TOOLTIP = "tooltip";
     public static final String EDITOR_ID = "editorId";
+    public static final String DEFAULT_EDITOR_ID = "0";
     
     /* SHAPES */
     public static final String LINE = "line";
     public static final String CIRCLE = "circle";
-    public static final String PATH = "path";
-    
-    public static final int CIRCLE_RADIUS = 20; // circle radius needs to be set because js cant retrieve the circle radius from the shape
+    public static final String PATH = "path";    
+    public static final int CIRCLE_RADIUS = 20; // circle radius needs to be set
+                                                // because js cant retrieve the
+                                                // circle radius from the shape
     
     private static final Log LOG = LogFactoryUtil.getLog(WhiteboardHandlerUtil.class);
     
@@ -64,8 +70,7 @@ public class WhiteboardHandlerUtil {
      * @param loggedUserMap
      * @return
      */
-    public static JSONObject generateLoggedUsersJSON(
-            ConcurrentMap<String, UserData> loggedUserMap) {
+    public static JSONObject generateLoggedUsersJSON(ConcurrentMap<String, UserData> loggedUserMap) {
         JSONObject usersLogged = JSONFactoryUtil.createJSONObject();
         JSONObject usersUpdateCommand = JSONFactoryUtil.createJSONObject();
         JSONArray commands = JSONFactoryUtil.createJSONArray();
@@ -77,9 +82,9 @@ public class WhiteboardHandlerUtil {
             String key = entry.getKey();
             UserData userData = entry.getValue();
             JSONObject user = JSONFactoryUtil.createJSONObject();
-            LOG.info(user);
+            LOG.debug(user);
             user.put(USERNAME, userData.getUserName());
-            user.put(USER_IMAGEPATH, userData.getUserImagePath());  
+            user.put(USER_IMAGEPATH, userData.getUserImagePath());
             user.put(SESSIONID, key);
             users.put(user);
         }
@@ -91,17 +96,18 @@ public class WhiteboardHandlerUtil {
         
         /* add commands to main json */
         usersLogged.put(COMMANDS, commands);
-        usersLogged.put(EDITOR_ID, "0");
+        usersLogged.put(EDITOR_ID, DEFAULT_EDITOR_ID);
         
-        LOG.info(usersLogged.toString());
+        LOG.debug(usersLogged.toString());
         
         return usersLogged;
-
+        
     }
     
     /**
-     * Persists whiteboard state, so if new users join the whiteboard, they can use the dump
-     * to initialize the whiteboard with the shapes previously created
+     * Persists whiteboard state, so if new users join the whiteboard, they can
+     * use the dump to initialize the whiteboard with the shapes previously
+     * created
      * 
      * @param whiteBoardDump
      * @param jsonMessage
@@ -113,13 +119,16 @@ public class WhiteboardHandlerUtil {
             int commandsLength = messageCommands.length();
             for (int i = 0; i < commandsLength; i++) {
                 JSONObject command = messageCommands.getJSONObject(i);
-
+                
                 if (!command.getString(ACTION).equals(USERS) && !command.getString(ACTION).equals(TOOLTIP)) {
                     /* if action is a delete command, removes entry from dump */
                     if (command.getString(ACTION).equals(DELETE)) {
                         whiteBoardDump.remove(command.getString(CACHEID));
                     } else {
-                        /* if shape already exists in dump map re sets the map entry */
+                        /*
+                         * if shape already exists in dump map re sets the map
+                         * entry
+                         */
                         if (whiteBoardDump.get(command.getString(CACHEID)) != null) {
                             JSONObject cachedCommand = whiteBoardDump.get(command.getString(CACHEID));
                             if (command.getString(TYPE).equals(LINE)) {
@@ -133,7 +142,7 @@ public class WhiteboardHandlerUtil {
                                 
                             } else if (command.getString(TYPE).equals(PATH)) {
                                 
-                                cachedCommand.getJSONObject(STATE).put(OPTIONS, command.getJSONObject(STATE));
+                                cachedCommand.getJSONObject(STATE).put(OPTIONS, command.getJSONObject(STATE).getJSONObject(OPTIONS));
                                 
                             } else {
                                 

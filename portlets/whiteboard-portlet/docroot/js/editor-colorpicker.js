@@ -16,7 +16,18 @@
  */
 
 YUI.add('color-picker', function (Y, NAME) {
+	
     var EVT_COLOR_CHANGE = 'color-picker:change';
+    var CONTAINER = 'container';
+    var SELECTOR_COLOR_PICKER_CONTAINER = '.color-picker-container';
+    var SELECTOR_CLOSE_PICKER = '.close-picker';
+    var SELECTOR_SAMPLE = '.sample';
+    var SELECTOR_HUE_DIAL = '.hue-dial';
+    var SELECTOR_SAT_SLIDER = '.sat-slider';
+    var SELECTOR_LUM_SLIDER = '.lum-slider';
+    var SELECTOR_OPACITY = 'select';
+    var SELECTOR_COLOR = '.color';
+    var SPACE = ' ';
     
     var ColorPicker = Y.Base.create('color-picker', Y.Base, [], {
         hue: null,
@@ -34,13 +45,13 @@ YUI.add('color-picker', function (Y, NAME) {
         
         bindUI: function () {
             var instance = this;
-            var colorPickerContainer = this.get('container').one('.color-picker-container');
+            var colorPickerContainer = this.get(CONTAINER).one(SELECTOR_COLOR_PICKER_CONTAINER);
             colorPickerContainer.removeClass('hidden');
-            this.sample = this.get('container').one('.sample');
+            this.sample = this.get(CONTAINER).one(SELECTOR_SAMPLE);
             this.sample.on('click', function(e) {
                 colorPickerContainer.removeClass('hidden');
             });
-            this.get('container').one('.close-picker').on('click', function(e) {
+            this.get(CONTAINER).one(SELECTOR_CLOSE_PICKER).on('click', function(e) {
                 e.preventDefault();
                 colorPickerContainer.addClass('hidden');
             });
@@ -51,25 +62,25 @@ YUI.add('color-picker', function (Y, NAME) {
                 stepsPerRevolution: 360,
                 continuous: true,
                 centerButtonDiameter: 0.4,
-                render: this.get('container').one('.hue-dial')
+                render: this.get(CONTAINER).one(SELECTOR_HUE_DIAL)
             });
             this.sat = new Y.Slider({
                 min: 0,
                 max: 100,
                 value: 100,
-                render: this.get('container').one('.sat-slider')
+                render: this.get(CONTAINER).one(SELECTOR_SAT_SLIDER)
             });
             this.lum = new Y.Slider({
                 min: 0,
                 max: 100,
                 value: 50,
-                render: this.get('container').one('.lum-slider')
+                render: this.get(CONTAINER).one(SELECTOR_LUM_SLIDER)
             });
             
-            this.satValue = this.get('container').one('.sat-slider span');
-            this.lumValue = this.get('container').one('.lum-slider span');
-            this.opacity = this.get('container').one('select');
-            this.color = this.get('container').one('.color');
+            this.satValue = this.get(CONTAINER).one(SELECTOR_SAT_SLIDER + SPACE + 'span');
+            this.lumValue = this.get(CONTAINER).one(SELECTOR_LUM_SLIDER + SPACE + 'span');
+            this.opacity = this.get(CONTAINER).one(SELECTOR_OPACITY);
+            this.color = this.get(CONTAINER).one(SELECTOR_COLOR);
             
             this.hue.after('valueChange', function(e) {
                 instance.updatePickerUI();

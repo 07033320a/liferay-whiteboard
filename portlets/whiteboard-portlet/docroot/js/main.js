@@ -18,27 +18,35 @@
 AUI().use('multiuser-whiteboard', function(A) {
 
     A.on('domready', function() {
-        var containerWidth = A.one('.whiteboard-portlet .editor').get('offsetWidth');
-        A.one('.whiteboard-portlet canvas').setAttribute('width', containerWidth);
+    	
+    	var SELECTOR_WHITEBOARD_PORTLET = '.whiteboard-portlet';
+    	var SELECTOR_CANVAS = 'canvas';
+    	var SELECTOR_EDITOR = '.editor';
+    	var SELECTOR_TEXT_EDITOR = '.text-editor';
+    	var SELECTOR_ONLINE_USERS_TEMPLATE = '#users-online-template';
+    	var SELECTOR_USER_TOOLTIPS_TEMPLATE = '#user-tooltips-template';
+    	var CANVAS_NAME = 'editor-canvas';
+    	var SPACE = ' ';
+    	var DASH = '-';
+    	
+        var containerWidth = A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_EDITOR).get('offsetWidth');
+        A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_CANVAS).setAttribute('width', containerWidth);
         
-        var canvas = new fabric.Canvas('editor-canvas');
+        var canvas = new fabric.Canvas(CANVAS_NAME);
         A.on(['orientationchange', 'resize'], function(e) {
-            containerWidth = A.one('.whiteboard-portlet .editor').get('offsetWidth');
+            containerWidth = A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_EDITOR).get('offsetWidth');
             canvas.setDimensions({width: containerWidth, height: 500 });
         });
         
         var editor = new A.MultiuserEditor({
             canvas: canvas,
-            container: A.one('.whiteboard-portlet .editor'),
-            textEditorNode: A.one('.whiteboard-portlet .text-editor'),
-            editorId: (Liferay.ThemeDisplay.getUserId() + '-' + Math.floor((Math.random() * 10) + 100)),
+            container: A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_EDITOR),
+            textEditorNode: A.one(SELECTOR_WHITEBOARD_PORTLET + SPACE + SELECTOR_TEXT_EDITOR),
+            editorId: (Liferay.ThemeDisplay.getUserId() + DASH + Math.floor((Math.random() * 10) + 100)),
             useAtmosphere: true,
-            userName: (Liferay.ThemeDisplay.getUserName() != '') ? Liferay.ThemeDisplay.getUserName() : 'Guest',
-            onlineUsersTemplate: A.one('#users-online-template').get('innerHTML'),
-            usersTooltipsTemplate: A.one('#user-tooltips-template').get('innerHTML'),
-            userImagePath: A.one('.whiteboard-portlet .profile-image-path').get('value'),
-        });
-        
+            onlineUsersTemplate: A.one(SELECTOR_ONLINE_USERS_TEMPLATE).get('innerHTML'),
+            usersTooltipsTemplate: A.one(SELECTOR_USER_TOOLTIPS_TEMPLATE).get('innerHTML'),
+            baseImagePath: Liferay.ThemeDisplay.getPathImage()
+        });     
     });
-
 });
